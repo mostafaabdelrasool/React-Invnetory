@@ -1,0 +1,6 @@
+.react-datepicker-wrapper {
+  display: block !important;
+}
+label{
+  margin: .5rem !important;
+}
