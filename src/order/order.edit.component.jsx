@@ -13,11 +13,20 @@ export default class OrderEdit extends Component {
     data: {
       shipAddress: "",
       shipCity: "",
-      phone: ""
-    }
-  };
-  dataServ = new OrderDataService("Order");
+      phone: "",
+      orderDetails: [],
+      customerId: null,
+      total: 0,
+      freight: 0,
+      OverallTotal: 0
+    },
 
+  };
+
+  dataServ = new OrderDataService("Order");
+  componentDidMount() {
+    this.setState({ initialData: { ...this.state.data } });
+  }
   promiseOptions = inputValue =>
     new Promise(resolve => {
       setTimeout(() => {
@@ -50,29 +59,61 @@ export default class OrderEdit extends Component {
     data.shipAddress = value.address;
     data.shipCity = value.city;
     data.phone = value.phone;
-    data.customerId=value.value
+    data.customerId = value.value
     this.setState({ data });
   }
   save() {
     let data = { ...this.state.data };
     data.orderDetails = OrderDataService.getOrder().orderDetails;
+    data.shipStatus = 2;
     this.setState({ data });
     this.dataServ.add(data).then(c => {
-
+      this.setState({ data: { ...this.state.initialData } });
     });
   }
+  updateOrderData = (val) => {
+    let data = { ...this.state.data };
+    data.total = val;
+    data.OverallTotal = val + data.freight
+    this.setState({ data })
+  }
+  handleFreightChange(event) {
+    const { value } = event.target;
+    let data = { ...this.state.data, freight: value };
+    data.OverallTotal += data.freight
+    this.setState({ data })
+  }
   render() {
+    const fontSize = { fontSize: '35px' }
     return (
       <div>
-        <Button
-          onClick={() => {
-            this.save();
-          }}
-          variant="dark"
-          className="align-items-start form-group"
-        >
-          Save
+        <div className="d-flex justify-content-between">
+          <div className="d-flex align-items-center">
+            <Button
+              onClick={() => {
+                this.save();
+              }}
+              variant="dark"
+              className="align-items-start form-group"
+            >
+              Save
         </Button>
+          </div>
+
+          <div className="d-flex flex-fill">
+            <div className="m-3">
+              <div className="font-weight-bolder">Total</div>
+              <div className="badge badge-dark" style={fontSize}>
+                {this.state.data.total}</div>
+            </div>
+            <div className="m-3">
+              <div className="font-weight-bolder">Overall Total</div>
+              <div className="badge badge-dark" style={fontSize}>
+                {this.state.data.OverallTotal}</div>
+            </div>
+          </div>
+        </div>
+
         <div className="card form-group">
           <div className="card-header">Order Data</div>
           <div className="card-body">
@@ -89,7 +130,7 @@ export default class OrderEdit extends Component {
                   onChange={e => this.handleCustomerChange(e)}
                 />
               </div>
-              <div className="col-md-4 form-group d-flex">
+              <div className="col-md-3 form-group d-flex">
                 <label className="d-block" htmlFor="">
                   Order date
                 </label>
@@ -99,7 +140,7 @@ export default class OrderEdit extends Component {
                   onChange={e => this.handleDateChane(e, "orderDate")}
                 />
               </div>
-              <div className="col-md-4 form-group  d-flex">
+              <div className="col-md-3 form-group  d-flex">
                 <label className="d-block" htmlFor="">
                   Required date
                 </label>
@@ -109,6 +150,16 @@ export default class OrderEdit extends Component {
                   onChange={e => this.handleDateChane(e, "requiredDate")}
                   name="requiredDate"
                 />
+              </div>
+              <div className="col-md-3 form-group  d-flex">
+                <label htmlFor="">Freight</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  name="freight"
+                  value={this.state.data.freight}
+                  onChange={e => this.handleFreightChange(e)}
+                ></input>
               </div>
             </div>
             <div className="row">
@@ -145,8 +196,8 @@ export default class OrderEdit extends Component {
             </div>
           </div>
         </div>
-        <OrderDetails order={this.state.data}></OrderDetails>
-      </div >
+        <OrderDetails order={this.state.data} onUpdate={this.updateOrderData}></OrderDetails>
+      </div>
     );
   }
 }

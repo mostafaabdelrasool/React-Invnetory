@@ -26,7 +26,7 @@ export default class ProductSizesComponent extends Component {
         this.setState({ data });
     }
     save(item) {
-        if (item.id) {
+        if (!item.id) {
             this.dataService.add(item)
         } else {
             this.dataService.update(item)

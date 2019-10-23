@@ -35,6 +35,7 @@ export default class OrderList extends Component {
               <th>Address</th>
               <th>City</th>
               <th>Phone</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -48,6 +49,7 @@ export default class OrderList extends Component {
                   <td>{x.shipAddress}</td>
                   <td>{x.shipCity}</td>
                   <td>{x.phone}</td>
+                  <td>{x.shipStatus}</td>
                   <td>
                     <Button
                       className="mr-1"

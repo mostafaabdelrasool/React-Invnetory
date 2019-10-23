@@ -24,7 +24,7 @@ export default class LayoutComponent extends Component {
             </li>
           </ul>
         </nav>
-        <div className="p-4">{this.props.children}</div>
+        <div className="p-2">{this.props.children}</div>
       </div>
     );
   }
