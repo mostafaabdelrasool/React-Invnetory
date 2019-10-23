@@ -79,8 +79,8 @@ export default class OrderEdit extends Component {
   }
   handleFreightChange(event) {
     const { value } = event.target;
-    let data = { ...this.state.data, freight: value };
-    data.OverallTotal += data.freight
+    let data = { ...this.state.data, freight: +value };
+    data.OverallTotal = data.OverallTotal + data.freight
     this.setState({ data })
   }
   render() {
