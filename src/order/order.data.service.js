@@ -2,11 +2,7 @@ import DataService from "../common/data/data.api";
 import axios from "axios";
 
 export default class OrderDataService extends DataService {
-    static order = {
-        shipAddress: "",
-        shipCity: "",
-        phone: ""
-    };
+    static order = { };
     searchCustomers(query) {
         return this.createPromise(axios.post(this.url + `Customer/Search?q=${query}`));
     }
@@ -19,4 +15,17 @@ export default class OrderDataService extends DataService {
     static getOrder(){
         return OrderDataService.order;
     }
+    updateOrderStatus(order){
+        return this.createPromise(axios.put(this.url + `Order/PartialUpdate?properties=ShipStatus`,order));
+    }
+   static mapProduct(product) {
+        return {
+          value: product.id,
+          label: product.productName,
+          unitPrice: product.unitPrice,
+          unitsInStock: product.unitsInStock,
+          image: product.image,
+          productSizes: product.productSizes
+        };
+      }
 }

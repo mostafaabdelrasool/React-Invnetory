@@ -4,3 +4,6 @@
 label{
   margin: .5rem !important;
 }
+.alert-container{
+  transition: all .5s ease;
+}

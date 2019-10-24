@@ -14,7 +14,7 @@ export default class DataService {
      * @param {object} data 
      */
     add(data) {
-       return this.createPromise(axios.post(this.url + this.controller, data))
+        return this.createPromise(axios.post(this.url + this.controller, data))
     }
     /**
      * update item on server
@@ -31,13 +31,20 @@ export default class DataService {
         return this.createPromise(axios.get(this.url + this.controller))
     }
     /**
+* get by id  from server
+* @param {id} data 
+*/
+    getById(id) {
+        return this.createPromise(axios.get(this.url + this.controller+ "/" + id))
+    }
+    /**
 * delete ite, all items from server
 * @param {object} data 
 */
     delete(id) {
         return this.createPromise(axios.delete(this.url + this.controller + "?id=" + id))
     }
-    createPromise(api){
+    createPromise(api) {
         let promise = new Promise((resolve, reject) => {
             api.then(res => {
                 if (res.status === 200) {

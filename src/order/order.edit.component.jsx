@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./order.style.css";
 import OrderDetails from "./order.details.component";
 import { Button } from "react-bootstrap";
+import castAllDates from "../common/data/cast.all.dates";
 export default class OrderEdit extends Component {
   state = {
     isLoading: false,
@@ -18,7 +19,8 @@ export default class OrderEdit extends Component {
       customerId: null,
       total: 0,
       freight: 0,
-      OverallTotal: 0
+      overallTotal: 0,
+      orderDate: new Date()
     },
 
   };
@@ -26,25 +28,38 @@ export default class OrderEdit extends Component {
   dataServ = new OrderDataService("Order");
   componentDidMount() {
     this.setState({ initialData: { ...this.state.data } });
+    var urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    if (id) {
+      this.dataServ.getById(id).then(x => {
+        castAllDates(x)
+        x.customer = this.mapCustomer(x.customer);
+        x.orderDetails.forEach(x => {
+          x.product = OrderDataService.mapProduct(x.product);
+        })
+        this.setState({ data: x });
+      })
+    }
   }
   promiseOptions = inputValue =>
     new Promise(resolve => {
       setTimeout(() => {
         this.dataServ.searchCustomers(inputValue).then(c => {
           resolve(
-            c.map(v => {
-              return {
-                value: v.id,
-                label: v.companyName,
-                address: v.address,
-                city: v.city,
-                phone: v.phone
-              };
-            })
+            c.map(v => this.mapCustomer(v))
           );
         });
       }, 1000);
     });
+  mapCustomer(customer) {
+    return {
+      value: customer.id,
+      label: customer.companyName,
+      address: customer.address,
+      city: customer.city,
+      phone: customer.phone
+    };
+  }
   handleChange(event) {
     const { name, value } = event.target;
     let data = { ...this.state.data, [name]: value };
@@ -67,20 +82,27 @@ export default class OrderEdit extends Component {
     data.orderDetails = OrderDataService.getOrder().orderDetails;
     data.shipStatus = 2;
     this.setState({ data });
-    this.dataServ.add(data).then(c => {
-      this.setState({ data: { ...this.state.initialData } });
-    });
+    let dataToSave= JSON.parse(JSON.stringify(data));;
+    dataToSave.customer = undefined;
+    dataToSave.orderDetails.forEach(x => { x.product = undefined });
+    if (!dataToSave.id) {
+      this.dataServ.add(dataToSave).then(c => {
+        this.setState({ data: { ...this.state.initialData } });
+      });
+    } else {
+      this.dataServ.update(dataToSave);
+    }
   }
   updateOrderData = (val) => {
     let data = { ...this.state.data };
     data.total = val;
-    data.OverallTotal = val + data.freight
+    data.overallTotal = val + data.freight
     this.setState({ data })
   }
   handleFreightChange(event) {
     const { value } = event.target;
     let data = { ...this.state.data, freight: +value };
-    data.OverallTotal = data.OverallTotal + data.freight
+    data.overallTotal = data.total + data.freight
     this.setState({ data })
   }
   render() {
@@ -109,7 +131,7 @@ export default class OrderEdit extends Component {
             <div className="m-3">
               <div className="font-weight-bolder">Overall Total</div>
               <div className="badge badge-dark" style={fontSize}>
-                {this.state.data.OverallTotal}</div>
+                {this.state.data.overallTotal}</div>
             </div>
           </div>
         </div>
@@ -124,6 +146,7 @@ export default class OrderEdit extends Component {
                 </label>
                 <AsyncSelect
                   className="flex-fill"
+                  value={this.state.data.customer}
                   cacheOptions
                   defaultOptions
                   loadOptions={this.promiseOptions}
@@ -151,7 +174,7 @@ export default class OrderEdit extends Component {
                   name="requiredDate"
                 />
               </div>
-              <div className="col-md-3 form-group  d-flex">
+              <div className="col-md-2 form-group  d-flex">
                 <label htmlFor="">Freight</label>
                 <input
                   className="form-control"

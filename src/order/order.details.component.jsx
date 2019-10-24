@@ -1,23 +1,28 @@
 import React, { Component } from "react";
 import AsyncSelect from "react-select/async";
 import OrderDataService from "./order.data.service";
-import { Button } from "react-bootstrap";
-import { faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { Button, Alert } from "react-bootstrap";
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 export default class OrderDetails extends Component {
   dataServ = new OrderDataService("Order");
   state = {
-    order: OrderDataService.order
+    showAlert: false,
+    alertMessage: ""
   };
   componentWillMount() {
-    let order = { ...this.state.order };
-    order.orderDetails = [];
-    this.changeState(order);
+    this.changeState(this.props.order);
   }
   changeState(data) {
-    this.setState({ order: data });
+    this.setState({ order: data })
     OrderDataService.updateOrder(data);
-
+  }
+  componentDidUpdate(oldProps) {
+    const newProps = this.props
+    if (oldProps.order !== newProps.order) {
+      this.changeState(newProps.order)
+    }
   }
   promiseOptions = inputValue =>
     new Promise(resolve => {
@@ -25,26 +30,19 @@ export default class OrderDetails extends Component {
         this.dataServ.searchProduct(inputValue).then(c => {
           resolve(
             c.map(v => {
-              return {
-                value: v.id,
-                label: v.productName,
-                unitPrice: v.unitPrice,
-                unitsInStock: v.unitsInStock,
-                image: v.image,
-                productSizes: v.productSizes
-              };
+              return OrderDataService.mapProduct(v);
             })
           );
         });
       }, 1000);
     });
+
   addNewProduct() {
     let order = { ...this.state.order };
     order.orderDetails.push({
       quantity: 0,
       discount: 0,
       total: 0,
-      productSizes: []
     });
     this.changeState(order);
   }
@@ -57,7 +55,7 @@ export default class OrderDetails extends Component {
     orderDetail.unitsInStock = value.unitsInStock;
     orderDetail.image = value.image;
     orderDetail.discount = 0;
-    orderDetail.productSizes = value.productSizes;
+    orderDetail.product = value;
     orderDetail.productSizeId = value.productSizes.length > 0 ? value.productSizes[0].id : "";
     orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
     data.orderDetails[index] = orderDetail;
@@ -66,6 +64,9 @@ export default class OrderDetails extends Component {
   }
   handleChange(event, orderDetail, index) {
     const { name, value } = event.target;
+    if (name === "quantity") {
+      this.validateStock(orderDetail, value);
+    }
     let data = { ...this.state.order };
     orderDetail[name] = value;
     orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
@@ -76,10 +77,24 @@ export default class OrderDetails extends Component {
     this.calculateTotal();
     this.setState({ data });
   }
-  handleProductSizeChange(event, index) {
+  validateStock(orderDetail, value) {
+    const productSize = orderDetail.product.productSizes.find(x => x.id === orderDetail.productSizeId);
+    if (productSize.unitInStock < value) {
+      this.setState({ showAlert: true, alertMessage: "Value exceed this amount in stock" });
+      return false;
+    }
+    return true
+  }
+  handleProductSizeChange(event, index, sizeIndex) {
     const { value } = event.target;
+    const size = this.state.order.orderDetails[index].product.productSizes.find(x => x.id === value);
+    if (size.unitInStock <= 0) {
+      this.setState({ showAlert: true, alertMessage: "Not enough amount in stock" });
+      return;
+    }
     let data = { ...this.state.order };
     data.orderDetails[index].productSizeId = value;
+    data.orderDetails[index].productSize = size
     this.changeState(data);
   }
   removeItem(item, index) {
@@ -99,10 +114,27 @@ export default class OrderDetails extends Component {
     })
     this.props.onUpdate(total);
   }
+  renderAlert() {
+    if (!this.state.showAlert)
+      return;
+    setTimeout(() => {
+      this.setState({ showAlert: false, alertMessage: "" });
+    }, 5000);
+    return this.state.showAlert ? (<div className="alert-container">
+      <Alert variant="danger" show={this.state.showAlert} dismissible>
+        <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+        <p>
+          {this.state.alertMessage}
+        </p>
+      </Alert>
+    </div>) : null;
+  }
   render() {
     const imgSize = { width: "100px" };
     return (
+
       <div className="form-group mt-1">
+        {this.renderAlert()}
         <div className="card ">
           <div className="card-header">Order Products</div>
           <div className="card-body">
@@ -128,6 +160,7 @@ export default class OrderDetails extends Component {
                     <tr key={i}>
                       <td>
                         <AsyncSelect
+                          value={d.product}
                           cacheOptions
                           defaultOptions
                           loadOptions={this.promiseOptions}
@@ -135,17 +168,18 @@ export default class OrderDetails extends Component {
                         />
                       </td>
                       <td>
-                        <img style={imgSize} src={d.image} alt=""></img>
+                        {d.product ? <img style={imgSize} src={d.product.image} alt=""></img> : null}
                       </td>
                       <td>
+
                         <select
                           className="form-control"
                           value={d.productSizeId}
                           onChange={e => this.handleProductSizeChange(e, i)}
                         >
-                          {d.productSizes.map((d, i) => {
-                            return <option key={i} value={d.id}>{d.size}</option>;
-                          })}
+                          {d.product ? d.product.productSizes.map((d, i) => {
+                            return <option key={i} value={d.id}>{d.size} / {d.unitInStock}</option>;
+                          }) : null}
                         </select>
                       </td>
                       <td >
