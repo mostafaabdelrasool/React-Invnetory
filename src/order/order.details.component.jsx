@@ -68,11 +68,12 @@ export default class OrderDetails extends Component {
       this.validateStock(orderDetail, value);
     }
     let data = { ...this.state.order };
-    orderDetail[name] = value;
-    orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
-    if (+orderDetail.discount > 0) {
-      orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
-    }
+     orderDetail[name] = value;
+    // orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
+    // if (+orderDetail.discount > 0) {
+    //   orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
+    // }
+    this.calulateItem(orderDetail);
     data.orderDetails[index] = orderDetail;
     this.calculateTotal();
     this.setState({ data });
@@ -110,9 +111,16 @@ export default class OrderDetails extends Component {
     let data = { ...this.state.order };
     let total = 0;
     data.orderDetails.forEach(x => {
+      this.calulateItem(x);
       total += x.total;
     })
     this.props.onUpdate(total);
+  }
+  calulateItem(item) {
+    item.total = (+item.quantity * item.unitPrice);
+    if (+item.discount > 0) {
+      item.total = item.total - (item.total * (+item.discount / 100))
+    }
   }
   renderAlert() {
     if (!this.state.showAlert)
@@ -129,7 +137,22 @@ export default class OrderDetails extends Component {
       </Alert>
     </div>) : null;
   }
+ 
   render() {
+    const customStyles = {
+      option: (provided, state) => ({
+        ...provided,
+        borderBottom: '1px solid white',
+        color: state.isSelected ? 'red' : 'white',
+        backgroundColor:'black'
+      }),
+      singleValue: (provided, state) => {
+        const opacity = state.isDisabled ? 0.5 : 1;
+        const transition = 'opacity 300ms';
+    
+        return { ...provided, opacity, transition };
+      },
+    }
     const imgSize = { width: "100px" };
     return (
 
@@ -165,6 +188,7 @@ export default class OrderDetails extends Component {
                           defaultOptions
                           loadOptions={this.promiseOptions}
                           onChange={e => this.handleProductChange(e, i)}
+                          styles={customStyles}
                         />
                       </td>
                       <td>

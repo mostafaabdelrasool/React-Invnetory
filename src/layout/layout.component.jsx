@@ -2,10 +2,16 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import "./layout.style.css";
 export default class LayoutComponent extends Component {
+  state = {
+    token: ""
+  }
+  componentDidMount() {
+    this.setState({ token: localStorage.getItem('Token') })
+  }
   render() {
     return (
       <div>
-        <nav className="navbar navbar-dark bg-dark">
+        {this.state.token ? <nav className="navbar navbar-dark bg-dark">
           <ul className="d-flex justify-content-around col-md-12 navbar-brand">
             <li>
               <Link to="/home">Home</Link>
@@ -22,8 +28,11 @@ export default class LayoutComponent extends Component {
             <li>
               <Link to="/customer">Customers</Link>
             </li>
+            <li>
+              <Link to="/login">Logout</Link>
+            </li>
           </ul>
-        </nav>
+        </nav> : null}
         <div className="p-2">{this.props.children}</div>
       </div>
     );
