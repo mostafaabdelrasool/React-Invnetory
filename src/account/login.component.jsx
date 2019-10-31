@@ -2,17 +2,21 @@ import React, { Component } from 'react'
 import "./login.style.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom'
+import { Link,withRouter } from 'react-router-dom'
 import AccountDataService from './account.service';
-export default class Login extends Component {
+export  class Login extends Component {
     state = {
         data: {}
+    }
+    componentDidMount(){
+        localStorage.removeItem('Token');
     }
     dataService = new AccountDataService();
     submit(event) {
         event.preventDefault();
         this.dataService.login(this.state.data).then(x=>{
-
+            localStorage.setItem('Token',x);
+            this.props.history.push('/');
         })
     }
     handleChange(event) {
@@ -71,3 +75,4 @@ export default class Login extends Component {
         )
     }
 }
+export default withRouter(Login)

@@ -10,33 +10,47 @@ import OrderEdit from './order/order.edit.component';
 import CustomerComponent from './customer/customer.componenet';
 import Login from './account/login.component';
 import Register from './account/register.component';
+import {
+  TransitionGroup,
+  CSSTransition
+} from "react-transition-group";
 function App() {
   return (
     <div>
       <Router>
         <div>
-          <Switch>
-            <Route path="/login" component={Login}></Route>
-            <Route path="/register" component={Register}></Route>
-            <PrivateRoute path="/models">
-              <ModelList></ModelList>
-            </PrivateRoute>
-            <PrivateRoute path="/category">
-              <Category></Category>
-            </PrivateRoute>
-            <PrivateRoute path="/product">
-              <Product></Product>
-            </PrivateRoute>
-            <PrivateRoute path="/orders">
-              <OrderList></OrderList>
-            </PrivateRoute>
-            <PrivateRoute path="/order-data">
-              <OrderEdit></OrderEdit>
-            </PrivateRoute>
-            <PrivateRoute path="/customer">
-              <CustomerComponent></CustomerComponent>
-            </PrivateRoute>
-          </Switch>
+          <TransitionGroup>
+            <CSSTransition
+              classNames="fade"
+              timeout={300}
+            >
+              <Switch>
+                <Route path="/login" component={Login}></Route>
+                <Route path="/register" component={Register}></Route>
+                <PrivateRoute path="/models">
+                  <ModelList></ModelList>
+                </PrivateRoute>
+                <PrivateRoute path="/category">
+                  <Category></Category>
+                </PrivateRoute>
+                <PrivateRoute path="/product">
+                  <Product></Product>
+                </PrivateRoute>
+                <PrivateRoute path="/orders">
+                  <OrderList></OrderList>
+                </PrivateRoute>
+                <PrivateRoute path="/order-data">
+                  <OrderEdit></OrderEdit>
+                </PrivateRoute>
+                <PrivateRoute path="/customer">
+                  <CustomerComponent></CustomerComponent>
+                </PrivateRoute>
+                <DefaultRoute></DefaultRoute>
+              </Switch>
+            </CSSTransition>
+
+          </TransitionGroup>
+
 
         </div>
       </Router>
@@ -54,7 +68,6 @@ function PrivateRoute({ children, ...rest }) {
           <LayoutComponent>
             {children}
           </LayoutComponent>
-
         ) : (
             <Redirect
               to={{
@@ -65,5 +78,25 @@ function PrivateRoute({ children, ...rest }) {
       }
     />
   );
+}
+function DefaultRoute() {
+  const token = localStorage.getItem('Token');
+  return (
+    <Route
+      render={({ location }) =>
+        token ? (
+          <LayoutComponent>
+            <OrderList></OrderList>
+          </LayoutComponent>
+        ) : (
+            <Redirect
+              to={{
+                pathname: "/login",
+              }}
+            />
+          )
+      }
+    />
+  )
 }
 export default App;
