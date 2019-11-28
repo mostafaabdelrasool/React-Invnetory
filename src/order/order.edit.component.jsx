@@ -39,7 +39,19 @@ export default class OrderEdit extends Component {
         })
         this.setState({ data: x });
       })
+    } else {
+      this.getNewOrderNumber()
     }
+  }
+  getNewOrderNumber() {
+    let now = Date.now().toString() // '1492341545873'
+    // pad with extra random digit
+    now += now + Math.floor(Math.random() * 10)
+    // format
+    const newNumber = [now.slice(0, 4), now.slice(4, 10), now.slice(10, 14)].join('-');
+    let data = { ...this.state.data }
+    data.orderNumber = newNumber;
+    this.setState({ data: data })
   }
   promiseOptions = inputValue =>
     new Promise(resolve => {
@@ -82,7 +94,7 @@ export default class OrderEdit extends Component {
     data.orderDetails = OrderDataService.getOrder().orderDetails;
     data.shipStatus = 2;
     this.setState({ data });
-    let dataToSave= JSON.parse(JSON.stringify(data));;
+    let dataToSave = JSON.parse(JSON.stringify(data));;
     dataToSave.customer = undefined;
     dataToSave.orderDetails.forEach(x => { x.product = undefined });
     if (!dataToSave.id) {
@@ -124,14 +136,17 @@ export default class OrderEdit extends Component {
 
           <div className="d-flex flex-fill">
             <div className="m-3">
-              <div className="font-weight-bolder">Total</div>
-              <div className="badge badge-dark" style={fontSize}>
-                {this.state.data.total}</div>
+              <div className="badge badge-warning order-info" >
+                Order Number: {this.state.data.orderNumber}
+              </div>
             </div>
             <div className="m-3">
-              <div className="font-weight-bolder">Overall Total</div>
-              <div className="badge badge-dark" style={fontSize}>
-                {this.state.data.overallTotal}</div>
+              <div className="badge badge-secondary order-info" style={fontSize}>
+                Total: {this.state.data.total}</div>
+            </div>
+            <div className="m-3">
+              <div className="badge badge-dark order-info" style={fontSize}>
+                Overall Total : {this.state.data.overallTotal}</div>
             </div>
           </div>
         </div>

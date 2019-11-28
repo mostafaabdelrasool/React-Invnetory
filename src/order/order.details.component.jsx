@@ -68,11 +68,7 @@ export default class OrderDetails extends Component {
       this.validateStock(orderDetail, value);
     }
     let data = { ...this.state.order };
-     orderDetail[name] = value;
-    // orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
-    // if (+orderDetail.discount > 0) {
-    //   orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
-    // }
+    orderDetail[name] = value;
     this.calulateItem(orderDetail);
     data.orderDetails[index] = orderDetail;
     this.calculateTotal();
@@ -100,7 +96,7 @@ export default class OrderDetails extends Component {
   }
   removeItem(item, index) {
     if (item.id) {
-
+      this.dataServ.deleteItem(item)
     }
     let data = { ...this.state.order };
     data.orderDetails.splice(index, 1);
@@ -137,19 +133,19 @@ export default class OrderDetails extends Component {
       </Alert>
     </div>) : null;
   }
- 
+
   render() {
     const customStyles = {
       option: (provided, state) => ({
         ...provided,
         borderBottom: '1px solid white',
         color: state.isSelected ? 'red' : 'white',
-        backgroundColor:'black'
+        backgroundColor: 'black'
       }),
       singleValue: (provided, state) => {
         const opacity = state.isDisabled ? 0.5 : 1;
         const transition = 'opacity 300ms';
-    
+
         return { ...provided, opacity, transition };
       },
     }

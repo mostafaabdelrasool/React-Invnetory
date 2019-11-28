@@ -18,6 +18,9 @@ export default class OrderDataService extends DataService {
     updateOrderStatus(order){
         return this.createPromise(axios.put(this.url + `Order/PartialUpdate?properties=ShipStatus`,order));
     }
+    deleteItem(item){
+        return this.createPromise(axios.put(this.url + `Order/DeleteOrderItem`,item));
+    }
    static mapProduct(product) {
         return {
           value: product.id,
