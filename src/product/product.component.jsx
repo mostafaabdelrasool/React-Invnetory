@@ -104,6 +104,7 @@ export default class Product extends Component {
               <th>Image</th>
               <th>ProductName</th>
               <th>Price</th>
+              <th>Discount</th>
               <th>Cost</th>
               <th>stock</th>
               <th>Actions</th>
@@ -118,6 +119,7 @@ export default class Product extends Component {
                 </td>
                 <td>{x.productName}</td>
                 <td>{x.unitPrice}</td>
+                <td>{x.discount}</td>
                 <td>{x.costPrice}</td>
                 <td>{x.unitsInStock}</td>
                 <td>

@@ -57,7 +57,11 @@ export default class OrderDetails extends Component {
     orderDetail.discount = 0;
     orderDetail.product = value;
     orderDetail.productSizeId = value.productSizes.length > 0 ? value.productSizes[0].id : "";
+    orderDetail.discount=value.discount;
     orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
+    if (+orderDetail.discount > 0) {
+      orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
+    }
     data.orderDetails[index] = orderDetail;
     this.changeState(data);
     this.calculateTotal();
@@ -96,7 +100,10 @@ export default class OrderDetails extends Component {
   }
   removeItem(item, index) {
     if (item.id) {
-      this.dataServ.deleteItem(item)
+      let order = { ...this.props.order }
+      order.orderDetails = [];
+      order.orderDetails.push(item);
+      this.dataServ.deleteItem(order)
     }
     let data = { ...this.state.order };
     data.orderDetails.splice(index, 1);
@@ -210,6 +217,7 @@ export default class OrderDetails extends Component {
                       <td className="d-flex">
                         <input className="form-control mr-1"
                           name="discount"
+                          value={d.discount}
                           onChange={e => this.handleChange(e, d, i)}></input>%
                       </td>
                       <td>{d.total}</td>

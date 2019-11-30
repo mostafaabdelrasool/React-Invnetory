@@ -14,6 +14,7 @@ export default class ProductEdit extends Component {
                 unitPrice: "",
                 costPrice: "",
                 unitsInStock: 0,
+                discount:0
             })
         },
         isEdit: this.props.data ? true : false
@@ -112,6 +113,16 @@ export default class ProductEdit extends Component {
                                         name="unitsInStock"
                                         onChange={e => this.handleChange(e)}
                                         value={this.state.data.unitsInStock}
+                                    ></input>
+                                </div>
+                                <div className="form-group">
+                                    <label>Discount</label>
+                                    <input
+                                        className="form-control"
+                                        type="number"
+                                        name="discount"
+                                        onChange={e => this.handleChange(e)}
+                                        value={this.state.data.discount}
                                     ></input>
                                 </div>
                                 <div className="form-group">

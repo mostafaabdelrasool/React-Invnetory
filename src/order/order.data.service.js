@@ -2,7 +2,7 @@ import DataService from "../common/data/data.api";
 import axios from "axios";
 
 export default class OrderDataService extends DataService {
-    static order = { };
+    static order = {};
     searchCustomers(query) {
         return this.createPromise(axios.post(this.url + `Customer/Search?q=${query}`));
     }
@@ -12,23 +12,24 @@ export default class OrderDataService extends DataService {
     static updateOrder(order) {
         OrderDataService.order = order;
     }
-    static getOrder(){
+    static getOrder() {
         return OrderDataService.order;
     }
-    updateOrderStatus(order){
-        return this.createPromise(axios.put(this.url + `Order/PartialUpdate?properties=ShipStatus`,order));
+    updateOrderStatus(order) {
+        return this.createPromise(axios.put(this.url + `Order/PartialUpdate?properties=ShipStatus`, order));
     }
-    deleteItem(item){
-        return this.createPromise(axios.put(this.url + `Order/DeleteOrderItem`,item));
+    deleteItem(item) {
+        return this.createPromise(axios.put(this.url + `Order/DeleteOrderItem`, item));
     }
-   static mapProduct(product) {
+    static mapProduct(product) {
         return {
-          value: product.id,
-          label: product.productName,
-          unitPrice: product.unitPrice,
-          unitsInStock: product.unitsInStock,
-          image: product.image,
-          productSizes: product.productSizes
+            value: product.id,
+            label: product.productName,
+            unitPrice: product.unitPrice,
+            unitsInStock: product.unitsInStock,
+            image: product.image,
+            productSizes: product.productSizes,
+            discount: product.discount
         };
-      }
+    }
 }
