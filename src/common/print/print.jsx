@@ -6,7 +6,7 @@ class Print extends Component {
 
         // iframe.focus();
         // iframeWindow.print();
-       let my_window = window.open('', 'mywindow', 'status=1,width=350,height=150');
+        let my_window = window.open('', 'mywindow', 'status=1,width=350,height=150');
         my_window.document.write('<html><head><title>Print Me</title></head>');
         my_window.document.write('<body onafterprint="self.close()">');
         my_window.document.write(document.getElementById(id).innerHTML);
@@ -20,7 +20,7 @@ class Print extends Component {
     render() {
         return (
             <>
-                <iframe id="receipt"  style={{ display: 'none' }} title="Receipt">
+                <iframe id="receipt" style={{ display: 'none' }} title="Receipt">
                     {this.props.children}
                 </iframe>
             </>

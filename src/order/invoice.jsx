@@ -6,7 +6,7 @@ export default class Invoice extends Component {
     state = {
         paid: 0,
         returned: 0,
-        showPrint: false
+        showPrint: false,
     }
     handleChange(event) {
         const { value } = event.target;
@@ -22,7 +22,7 @@ export default class Invoice extends Component {
     }
     render() {
         let showPrint = this.state.showPrint ? <Print>
-            <Receipt></Receipt>
+            <Receipt data={this.props.data}></Receipt>
         </Print> : null
         return (
             <div>

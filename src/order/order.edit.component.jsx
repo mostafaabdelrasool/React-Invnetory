@@ -131,7 +131,7 @@ export default class OrderEdit extends Component {
   render() {
     const fontSize = { fontSize: '35px' }
     const pay = this.state.showPay ? (<ModalComponent close={this.closeModal}>
-      <Invoice total={this.state.data.overallTotal}></Invoice >
+      <Invoice total={this.state.data.overallTotal} data={this.state.data}></Invoice >
     </ModalComponent>) : null
     return (
       <div>
