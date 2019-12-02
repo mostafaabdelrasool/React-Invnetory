@@ -217,8 +217,9 @@ export default class OrderDetails extends Component {
                       <td className="d-flex">
                         <input className="form-control mr-1"
                           name="discount"
+                          readOnly
                           value={d.discount}
-                          onChange={e => this.handleChange(e, d, i)}></input>%
+                          ></input>%
                       </td>
                       <td>{d.total}</td>
                       <td>

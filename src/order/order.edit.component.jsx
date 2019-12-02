@@ -7,10 +7,13 @@ import "./order.style.css";
 import OrderDetails from "./order.details.component";
 import { Button } from "react-bootstrap";
 import castAllDates from "../common/data/cast.all.dates";
+import Invoice from './invoice';
+import ModalComponent from "../common/modal/modal";
 export default class OrderEdit extends Component {
   state = {
     isLoading: false,
     customers: [],
+    showPay: false,
     data: {
       shipAddress: "",
       shipCity: "",
@@ -117,10 +120,22 @@ export default class OrderEdit extends Component {
     data.overallTotal = data.total + data.freight
     this.setState({ data })
   }
+  pay() {
+    let { showPay } = { ...this.state }
+    showPay = !showPay;
+    this.setState({ showPay: showPay });
+  }
+  closeModal = () => {
+    this.setState({ showPay: false });
+  };
   render() {
     const fontSize = { fontSize: '35px' }
+    const pay = this.state.showPay ? (<ModalComponent close={this.closeModal}>
+      <Invoice total={this.state.data.overallTotal}></Invoice >
+    </ModalComponent>) : null
     return (
       <div>
+        {pay}
         <div className="d-flex justify-content-between">
           <div className="d-flex align-items-center">
             <Button
@@ -131,6 +146,15 @@ export default class OrderEdit extends Component {
               className="align-items-start form-group"
             >
               Save
+        </Button>
+            <Button
+              onClick={() => {
+                this.pay();
+              }}
+              variant="dark"
+              className="align-items-start form-group"
+            >
+              Pay
         </Button>
           </div>
 
