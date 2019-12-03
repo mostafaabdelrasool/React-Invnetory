@@ -8,8 +8,11 @@ label{
   transition: all .5s ease;
 }
 .order-info{
-  font-size: 35px !important;
-    height: 100px;
-    display: flex !important;
-    align-items: center;
+  font-size: 24px !important;
+  height: 40px;
+  display: flex !important;
+  align-items: center;
+}
+.form-group {
+  margin-bottom: .2rem !important;
 }

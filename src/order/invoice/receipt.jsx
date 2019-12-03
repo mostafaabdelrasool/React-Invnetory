@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './receipt.css'
+import formateDate from '../../common/extentions/date';
 class Receipt extends Component {
   render() {
     const styleSheet = {
@@ -25,8 +26,15 @@ class Receipt extends Component {
 
       "legalcopy": { "marginTop": "5mm" },
       "tabletitle": { "fontSize": ".5em" },
-      "table": { "width": "100%", "borderCollapse": "collapse" },
-      item: { "borderBottom": "1px solid black" }
+      "table": {
+        "width": "100%",
+        "borderCollapse": "collapse",
+        borderBottom: '1px solid',
+        marginBottom: '1em',
+      },
+      item: { "borderBottom": "1px solid black" },
+      detail: { fontSize: '.6em' },
+      total: { fontSize: '.9em', margingTop: '5mm' }
     }
     return (
       <div id="invoice-POS" style={styleSheet.container}>
@@ -34,8 +42,13 @@ class Receipt extends Component {
           <div style={styleSheet.logo}></div>
           <div style={styleSheet.info}>
             <h2 style={styleSheet.h2}>S T R I N G</h2>
+            <p style={styleSheet.detail}>Mobile : 01008261016</p>
           </div>
         </center>
+        <div>
+          <h2 style={styleSheet.detail}>{formateDate(this.props.data.orderDate)}</h2>
+          <h2 style={styleSheet.detail}>{this.props.data.orderNumber}</h2>
+        </div>
         <div id="bot">
           <div>
             <table style={styleSheet.table}>
@@ -50,7 +63,7 @@ class Receipt extends Component {
               <tbody>
                 {this.props.data.orderDetails.map((d, i) => {
                   return (<tr key={i}>
-                    <td>{d.product.name}</td>
+                    <td>{d.product.label}</td>
                     <td>{d.unitPrice}</td>
                     <td>{d.quantity}</td>
                     <td>{d.total}</td>
@@ -62,12 +75,12 @@ class Receipt extends Component {
 
             </table>
           </div>
-          <div>
+          <div style={styleSheet.total}>
             Total:{this.props.data.overallTotal}
           </div>
           <div style={styleSheet.legalcopy}>
-            <p className="legal"><strong>Thank you for your business!</strong> 
-						</p>
+            <p style={styleSheet.detail}><strong>Thank for dealing with us!</strong>
+            </p>
           </div>
 
         </div>
