@@ -52,7 +52,7 @@ export  class Login extends Component {
                                         <input type="password" name="password" className="form-control" placeholder="password" onChange={e => this.handleChange(e)}></input>
                                     </div>
                                     <div className="row align-items-center remember">
-                                        <input type="checkbox" name="rememberMe"  onChange={e => this.handleChange(e)}></input>Remember Me
+                                        <input type="checkbox" defaultChecked={false} name="rememberMe"  onChange={e => this.handleChange(e)}></input>Remember Me
                                     </div>
                                     <div className="form-group">
                                         <input type="submit" value="Login" className="btn float-right login_btn"></input>

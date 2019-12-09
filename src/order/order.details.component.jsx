@@ -4,8 +4,10 @@ import OrderDataService from "./order.data.service";
 import { Button, Alert } from "react-bootstrap";
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { connect } from 'react-redux';
+import * as orderActions from './redux/order.action'
 
-export default class OrderDetails extends Component {
+class OrderDetails extends Component {
   dataServ = new OrderDataService("Order");
   state = {
     showAlert: false,
@@ -15,8 +17,7 @@ export default class OrderDetails extends Component {
     this.changeState(this.props.order);
   }
   changeState(data) {
-    this.setState({ order: data })
-    OrderDataService.updateOrder(data);
+    this.props.orderUpdate(data)
   }
   componentDidUpdate(oldProps) {
     const newProps = this.props
@@ -38,7 +39,7 @@ export default class OrderDetails extends Component {
     });
 
   addNewProduct() {
-    let order = { ...this.state.order };
+    let order = { ...this.props.order };
     order.orderDetails.push({
       quantity: 0,
       discount: 0,
@@ -47,7 +48,7 @@ export default class OrderDetails extends Component {
     this.changeState(order);
   }
   handleProductChange(value, index) {
-    let data = { ...this.state.order };
+    let data = { ...this.props.order };
     let orderDetail = {};
     orderDetail.productId = value.value;
     orderDetail.unitPrice = value.unitPrice;
@@ -57,26 +58,24 @@ export default class OrderDetails extends Component {
     orderDetail.discount = 0;
     orderDetail.product = value;
     orderDetail.productSizeId = value.productSizes.length > 0 ? value.productSizes[0].id : "";
-    orderDetail.discount=value.discount;
+    orderDetail.discount = value.discount;
     orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
     if (+orderDetail.discount > 0) {
       orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
     }
     data.orderDetails[index] = orderDetail;
-    this.changeState(data);
     this.calculateTotal();
+    this.changeState(data);
   }
   handleChange(event, orderDetail, index) {
     const { name, value } = event.target;
     if (name === "quantity") {
       this.validateStock(orderDetail, value);
     }
-    let data = { ...this.state.order };
+    let data = { ...this.props.order };
     orderDetail[name] = value;
-    this.calulateItem(orderDetail);
     data.orderDetails[index] = orderDetail;
-    this.calculateTotal();
-    this.setState({ data });
+    this.props.updateItemAction(data);
   }
   validateStock(orderDetail, value) {
     const productSize = orderDetail.product.productSizes.find(x => x.id === orderDetail.productSizeId);
@@ -88,7 +87,7 @@ export default class OrderDetails extends Component {
   }
   handleProductSizeChange(event, index, sizeIndex) {
     const { value } = event.target;
-    const size = this.state.order.orderDetails[index].product.productSizes.find(x => x.id === value);
+    const size = this.props.order.orderDetails[index].product.productSizes.find(x => x.id === value);
     if (size.unitInStock <= 0) {
       this.setState({ showAlert: true, alertMessage: "Not enough amount in stock" });
       return;
@@ -105,26 +104,10 @@ export default class OrderDetails extends Component {
       order.orderDetails.push(item);
       this.dataServ.deleteItem(order)
     }
-    let data = { ...this.state.order };
-    data.orderDetails.splice(index, 1);
-    this.changeState(data);
-    this.calculateTotal();
+    this.props.removeOrderItem(item);
   }
-  calculateTotal() {
-    let data = { ...this.state.order };
-    let total = 0;
-    data.orderDetails.forEach(x => {
-      this.calulateItem(x);
-      total += x.total;
-    })
-    this.props.onUpdate(total);
-  }
-  calulateItem(item) {
-    item.total = (+item.quantity * item.unitPrice);
-    if (+item.discount > 0) {
-      item.total = item.total - (item.total * (+item.discount / 100))
-    }
-  }
+
+
   renderAlert() {
     if (!this.state.showAlert)
       return;
@@ -181,7 +164,7 @@ export default class OrderDetails extends Component {
                 </tr>
               </thead>
               <tbody>
-                {this.state.order.orderDetails.map((d, i) => {
+                {this.props.order.orderDetails.map((d, i) => {
                   return (
                     <tr key={i}>
                       <td>
@@ -219,7 +202,7 @@ export default class OrderDetails extends Component {
                           name="discount"
                           readOnly
                           value={d.discount}
-                          ></input>%
+                        ></input>%
                       </td>
                       <td>{d.total}</td>
                       <td>
@@ -238,3 +221,16 @@ export default class OrderDetails extends Component {
     );
   }
 }
+const mapStateToProps = (state) => {
+  return { order: state.order }
+}
+
+const mapDispatchToProps = {
+  updateItemAction: orderActions.updateItemAction,
+  newItemAcion: orderActions.newItemAcion,
+  orderUpdate: orderActions.orderUpdate,
+  clearOrder: orderActions.clearOrder,
+  removeOrderItem:orderActions.removeOrderItem
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(OrderDetails)

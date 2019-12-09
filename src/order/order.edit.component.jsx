@@ -9,28 +9,18 @@ import { Button } from "react-bootstrap";
 import castAllDates from "../common/data/cast.all.dates";
 import Invoice from './invoice';
 import ModalComponent from "../common/modal/modal";
-export default class OrderEdit extends Component {
+import { connect } from 'react-redux';
+import * as orderAtions from './redux/order.action'
+class OrderEdit extends Component {
   state = {
     isLoading: false,
     customers: [],
     showPay: false,
-    data: {
-      shipAddress: "",
-      shipCity: "",
-      phone: "",
-      orderDetails: [],
-      customerId: null,
-      total: 0,
-      freight: 0,
-      overallTotal: 0,
-      orderDate: new Date()
-    },
-
   };
 
   dataServ = new OrderDataService("Order");
   componentDidMount() {
-    this.setState({ initialData: { ...this.state.data } });
+    this.setState({ initialData: { ...this.props.order } });
     var urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
     if (id) {
@@ -40,22 +30,14 @@ export default class OrderEdit extends Component {
         x.orderDetails.forEach(x => {
           x.product = OrderDataService.mapProduct(x.product);
         })
-        this.setState({ data: x });
+        this.props.orderUpdate(x);
       })
     } else {
-      this.getNewOrderNumber()
+      const newOrder = this.dataServ.getNewOrderNumber();
+      this.props.orderUpdate(newOrder);
     }
   }
-  getNewOrderNumber() {
-    let now = Date.now().toString() // '1492341545873'
-    // pad with extra random digit
-    now += now + Math.floor(Math.random() * 10)
-    // format
-    const newNumber = [now.slice(0, 4), now.slice(4, 10), now.slice(10, 14)].join('-');
-    let data = { ...this.state.data }
-    data.orderNumber = newNumber;
-    this.setState({ data: data })
-  }
+
   promiseOptions = inputValue =>
     new Promise(resolve => {
       setTimeout(() => {
@@ -77,48 +59,48 @@ export default class OrderEdit extends Component {
   }
   handleChange(event) {
     const { name, value } = event.target;
-    let data = { ...this.state.data, [name]: value };
-    this.setState({ data });
+    let data = { ...this.props.order, [name]: value };
+    this.props.orderUpdate(data);
   }
   handleDateChane(value, model) {
-    let data = { ...this.state.data, [model]: value };
-    this.setState({ data });
+    let data = { ...this.props.order, [model]: value };
+    this.props.orderUpdate(data);
   }
   handleCustomerChange(value) {
-    let data = { ...this.state.data };
+    let data = { ...this.props.order };
     data.shipAddress = value.address;
     data.shipCity = value.city;
     data.phone = value.phone;
     data.customerId = value.value
-    this.setState({ data });
+    this.props.orderUpdate(data);
   }
   save() {
-    let data = { ...this.state.data };
+    let data = { ...this.props.order };
     data.orderDetails = OrderDataService.getOrder().orderDetails;
     data.shipStatus = 2;
-    this.setState({ data });
+    this.props.orderUpdate(data);
     let dataToSave = JSON.parse(JSON.stringify(data));;
     dataToSave.customer = undefined;
     dataToSave.orderDetails.forEach(x => { x.product = undefined });
     if (!dataToSave.id) {
       this.dataServ.add(dataToSave).then(c => {
-        this.setState({ data: { ...this.state.initialData } });
+         this.props.clearOrder();
       });
     } else {
       this.dataServ.update(dataToSave);
     }
   }
   updateOrderData = (val) => {
-    let data = { ...this.state.data };
+    let data = { ...this.props.order };
     data.total = val;
     data.overallTotal = val + data.freight
-    this.setState({ data })
+    this.props.orderUpdate(data);
   }
   handleFreightChange(event) {
     const { value } = event.target;
-    let data = { ...this.state.data, freight: +value };
+    let data = { ...this.props.order, freight: +value };
     data.overallTotal = data.total + data.freight
-    this.setState({ data })
+    this.props.orderUpdate(data);
   }
   pay() {
     let { showPay } = { ...this.state }
@@ -131,7 +113,7 @@ export default class OrderEdit extends Component {
   render() {
     const fontSize = { fontSize: '35px' }
     const pay = this.state.showPay ? (<ModalComponent close={this.closeModal}>
-      <Invoice total={this.state.data.overallTotal} data={this.state.data}></Invoice >
+      <Invoice total={this.props.order.overallTotal} data={this.props.order}></Invoice >
     </ModalComponent>) : null
     return (
       <div>
@@ -161,16 +143,16 @@ export default class OrderEdit extends Component {
           <div className="d-flex flex-fill">
             <div className="m-3">
               <div className="badge badge-warning order-info" >
-                Order Number: {this.state.data.orderNumber}
+                Order Number: {this.props.order.orderNumber}
               </div>
             </div>
             <div className="m-3">
               <div className="badge badge-secondary order-info" style={fontSize}>
-                Total: {this.state.data.total}</div>
+                Total: {this.props.order.total}</div>
             </div>
             <div className="m-3">
               <div className="badge badge-dark order-info" style={fontSize}>
-                Overall Total : {this.state.data.overallTotal}</div>
+                Overall Total : {this.props.order.overallTotal}</div>
             </div>
           </div>
         </div>
@@ -185,7 +167,7 @@ export default class OrderEdit extends Component {
                 </label>
                 <AsyncSelect
                   className="flex-fill"
-                  value={this.state.data.customer}
+                  value={this.props.order.customer}
                   cacheOptions
                   defaultOptions
                   loadOptions={this.promiseOptions}
@@ -198,7 +180,7 @@ export default class OrderEdit extends Component {
                 </label>
                 <DatePicker
                   className="form-control"
-                  selected={this.state.data.orderDate}
+                  selected={this.props.order.orderDate}
                   onChange={e => this.handleDateChane(e, "orderDate")}
                 />
               </div>
@@ -208,7 +190,7 @@ export default class OrderEdit extends Component {
                 </label>
                 <DatePicker
                   className="form-control"
-                  selected={this.state.data.requiredDate}
+                  selected={this.props.order.requiredDate}
                   onChange={e => this.handleDateChane(e, "requiredDate")}
                   name="requiredDate"
                 />
@@ -219,7 +201,7 @@ export default class OrderEdit extends Component {
                   className="form-control"
                   type="number"
                   name="freight"
-                  value={this.state.data.freight}
+                  value={this.props.order.freight}
                   onChange={e => this.handleFreightChange(e)}
                 ></input>
               </div>
@@ -231,7 +213,7 @@ export default class OrderEdit extends Component {
                   className="form-control"
                   type="text"
                   name="shipAddress"
-                  value={this.state.data.shipAddress}
+                  value={this.props.order.shipAddress}
                   onChange={e => this.handleChange(e)}
                 ></input>
               </div>
@@ -241,7 +223,7 @@ export default class OrderEdit extends Component {
                   className="form-control"
                   type="text"
                   name="shipCity"
-                  value={this.state.data.shipCity}
+                  value={this.props.order.shipCity}
                   onChange={e => this.handleChange(e)}
                 ></input>
               </div>
@@ -251,15 +233,27 @@ export default class OrderEdit extends Component {
                   className="form-control"
                   type="text"
                   name="phone"
-                  value={this.state.data.phone}
+                  value={this.props.order.phone}
                   onChange={e => this.handleChange(e)}
                 ></input>
               </div>
             </div>
           </div>
         </div>
-        <OrderDetails order={this.state.data} onUpdate={this.updateOrderData}></OrderDetails>
+        <OrderDetails order={this.props.order} onUpdate={this.updateOrderData}></OrderDetails>
       </div>
     );
   }
 }
+const mapStateToProps = (state) => {
+  return { order: state.order }
+}
+
+const mapDispatchToProps = {
+  updateItemAction: orderAtions.updateItemAction,
+  newItemAcion: orderAtions.newItemAcion,
+  orderUpdate: orderAtions.orderUpdate,
+  clearOrder:orderAtions.clearOrder,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(OrderEdit)
