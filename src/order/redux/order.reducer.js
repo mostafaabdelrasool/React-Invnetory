@@ -29,6 +29,24 @@ const removeOrderItem = (state, item) => {
     state.orderDetails.splice(index, 1);
     return calculateTotal(state);
 }
+const addOrderItem = (state, item) => {
+    let orderDetail = {};
+    orderDetail.productId = item.value;
+    orderDetail.unitPrice = item.unitPrice;
+    orderDetail.quantity = 1;
+    orderDetail.unitsInStock = item.unitsInStock;
+    orderDetail.image = item.image;
+    orderDetail.discount = 0;
+    orderDetail.product = item;
+    orderDetail.productSizeId = item.productSizes.length > 0 ? item.productSizes[0].id : "";
+    orderDetail.discount = item.discount;
+    orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
+    if (+orderDetail.discount > 0) {
+        orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
+    }
+    state.orderDetails[item.index] = orderDetail;
+    return calculateTotal(state);
+}
 const orderReducer = (state = initialState, action) => {
     switch (action.type) {
         case 'UDATE_ORDER':
@@ -39,6 +57,8 @@ const orderReducer = (state = initialState, action) => {
             return calculateTotal(action.payload);
         case 'REMOVE_ORDER_ITEM':
             return removeOrderItem({ ...state }, action.payload);
+        case 'ADD_ORDER_ITEM':
+            return addOrderItem({ ...state }, action.payload);
         default:
             break;
     }

@@ -48,24 +48,8 @@ class OrderDetails extends Component {
     this.changeState(order);
   }
   handleProductChange(value, index) {
-    let data = { ...this.props.order };
-    let orderDetail = {};
-    orderDetail.productId = value.value;
-    orderDetail.unitPrice = value.unitPrice;
-    orderDetail.quantity = 1;
-    orderDetail.unitsInStock = value.unitsInStock;
-    orderDetail.image = value.image;
-    orderDetail.discount = 0;
-    orderDetail.product = value;
-    orderDetail.productSizeId = value.productSizes.length > 0 ? value.productSizes[0].id : "";
-    orderDetail.discount = value.discount;
-    orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
-    if (+orderDetail.discount > 0) {
-      orderDetail.total = orderDetail.total - (orderDetail.total * (+orderDetail.discount / 100))
-    }
-    data.orderDetails[index] = orderDetail;
-    this.calculateTotal();
-    this.changeState(data);
+    value.index = index;
+    this.props.addOrderItem(value)
   }
   handleChange(event, orderDetail, index) {
     const { name, value } = event.target;
@@ -230,7 +214,8 @@ const mapDispatchToProps = {
   newItemAcion: orderActions.newItemAcion,
   orderUpdate: orderActions.orderUpdate,
   clearOrder: orderActions.clearOrder,
-  removeOrderItem:orderActions.removeOrderItem
+  removeOrderItem: orderActions.removeOrderItem,
+  addOrderItem: orderActions.addOrderItem
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrderDetails)

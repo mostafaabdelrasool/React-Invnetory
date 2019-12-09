@@ -76,9 +76,7 @@ class OrderEdit extends Component {
   }
   save() {
     let data = { ...this.props.order };
-    data.orderDetails = OrderDataService.getOrder().orderDetails;
     data.shipStatus = 2;
-    this.props.orderUpdate(data);
     let dataToSave = JSON.parse(JSON.stringify(data));;
     dataToSave.customer = undefined;
     dataToSave.orderDetails.forEach(x => { x.product = undefined });

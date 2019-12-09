@@ -28,4 +28,10 @@ export const removeOrderItem = orderItem => {
         payload: orderItem
     }
 }
-export default newItemAcion | updateItemAction | orderUpdate | clearOrder | removeOrderItem;
+export const addOrderItem = orderItem => {
+    return {
+        type: 'ADD_ORDER_ITEM',
+        payload: orderItem
+    }
+}
+export default newItemAcion | updateItemAction | orderUpdate | clearOrder | removeOrderItem | addOrderItem;
