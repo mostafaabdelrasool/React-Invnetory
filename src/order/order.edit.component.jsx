@@ -88,12 +88,6 @@ class OrderEdit extends Component {
       this.dataServ.update(dataToSave);
     }
   }
-  updateOrderData = (val) => {
-    let data = { ...this.props.order };
-    data.total = val;
-    data.overallTotal = val + data.freight
-    this.props.orderUpdate(data);
-  }
   handleFreightChange(event) {
     const { value } = event.target;
     let data = { ...this.props.order, freight: +value };
@@ -238,7 +232,7 @@ class OrderEdit extends Component {
             </div>
           </div>
         </div>
-        <OrderDetails order={this.props.order} onUpdate={this.updateOrderData}></OrderDetails>
+        <OrderDetails ></OrderDetails>
       </div>
     );
   }
