@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default class DataService {
-    url = 'http://localhost:31581/api/';
+    url = 'https://localhost:44371/api/';
     controller = "";
     /**
      * @param {string} name           Server controller name.
@@ -9,6 +9,7 @@ export default class DataService {
     constructor(controller) {
         this.controller = controller;
         axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('Token')}`;
+       
     }
     /**
      * Add item to server

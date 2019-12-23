@@ -33,8 +33,8 @@ class OrderEdit extends Component {
         this.props.orderUpdate(x);
       })
     } else {
-      const newOrder = this.dataServ.getNewOrderNumber();
-      this.props.orderUpdate(newOrder);
+      const newOrderNo = this.dataServ.getNewOrderNumber();
+      this.props.createNewOrderNumber(newOrderNo);
     }
   }
 
@@ -79,13 +79,12 @@ class OrderEdit extends Component {
     data.shipStatus = 2;
     let dataToSave = JSON.parse(JSON.stringify(data));;
     dataToSave.customer = undefined;
-    dataToSave.orderDetails.forEach(x => { x.product = undefined });
     if (!dataToSave.id) {
-      this.dataServ.add(dataToSave).then(c => {
+      this.dataServ.saveOrder(dataToSave).then(c => {
          this.props.clearOrder();
       });
     } else {
-      this.dataServ.update(dataToSave);
+      this.dataServ.updateOrder(dataToSave);
     }
   }
   handleFreightChange(event) {
@@ -246,6 +245,7 @@ const mapDispatchToProps = {
   newItemAcion: orderAtions.newItemAcion,
   orderUpdate: orderAtions.orderUpdate,
   clearOrder:orderAtions.clearOrder,
+  createNewOrderNumber:orderAtions.createNewOrderNumber
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrderEdit)

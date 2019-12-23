@@ -34,4 +34,17 @@ export const addOrderItem = orderItem => {
         payload: orderItem
     }
 }
-export default newItemAcion | updateItemAction | orderUpdate | clearOrder | removeOrderItem | addOrderItem;
+export const createNewOrderNumber = orderNumber => {
+    return {
+        type: 'CREATE_NEW_ORDER_NUMBER',
+        payload: orderNumber
+    }
+}
+export const changeProductSize = size => {
+    return {
+        type: 'CHANGE_PRODUCT_SIZE',
+        payload: size
+    }
+}
+export default newItemAcion | updateItemAction | orderUpdate | clearOrder |
+    removeOrderItem | addOrderItem | createNewOrderNumber | changeProductSize;

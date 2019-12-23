@@ -38,6 +38,8 @@ const addOrderItem = (state, item) => {
     orderDetail.image = item.image;
     orderDetail.discount = 0;
     orderDetail.product = item;
+    orderDetail.productName = item.name;
+    orderDetail.productCode = item.label
     orderDetail.productSizeId = item.productSizes.length > 0 ? item.productSizes[0].id : "";
     orderDetail.discount = item.discount;
     orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
@@ -46,6 +48,16 @@ const addOrderItem = (state, item) => {
     }
     state.orderDetails[item.index] = orderDetail;
     return calculateTotal(state);
+}
+const createOrderNumber = (orderNumber) => {
+    let state = { ...initialState };
+    state.orderNumber = orderNumber;
+    return state;
+}
+const changeProductSize = (state, size) => {
+    state.orderDetails[size.orderDetailIndex].productSizeId = size.id;
+    state.orderDetails[size.orderDetailIndex].productSize = size;
+    return state;
 }
 const orderReducer = (state = initialState, action) => {
     switch (action.type) {
@@ -59,6 +71,10 @@ const orderReducer = (state = initialState, action) => {
             return removeOrderItem({ ...state }, action.payload);
         case 'ADD_ORDER_ITEM':
             return addOrderItem({ ...state }, action.payload);
+        case 'CREATE_NEW_ORDER_NUMBER':
+            return createOrderNumber(action.payload);
+        case 'CHANGE_PRODUCT_SIZE':
+            return changeProductSize({ ...state }, action.payload);
         default:
             break;
     }

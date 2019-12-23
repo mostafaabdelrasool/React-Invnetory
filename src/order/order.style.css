@@ -16,3 +16,6 @@ label{
 .form-group {
   margin-bottom: .2rem !important;
 }
+.number-cell-width{
+  width: 7em;
+}

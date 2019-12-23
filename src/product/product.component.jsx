@@ -57,7 +57,7 @@ export default class Product extends Component {
         products[index].productSizes = x;
         this.setState({ data: products });
       });
-    }else{
+    } else {
       products[index].showChild = false;
       this.setState({ data: products });
     }
@@ -101,7 +101,7 @@ export default class Product extends Component {
         <Table striped bordered hover variant="dark">
           <thead>
             <tr>
-              <th>Image</th>
+              <th>Code</th>
               <th>ProductName</th>
               <th>Price</th>
               <th>Discount</th>
@@ -115,7 +115,7 @@ export default class Product extends Component {
               let rows = [];
               rows.push(<tr key={i}>
                 <td>
-                  <img alt="" style={imgSize} src={x.image}></img>
+                  {x.productCode}
                 </td>
                 <td>{x.productName}</td>
                 <td>{x.unitPrice}</td>

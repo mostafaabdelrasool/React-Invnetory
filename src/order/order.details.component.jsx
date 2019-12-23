@@ -71,15 +71,17 @@ class OrderDetails extends Component {
   }
   handleProductSizeChange(event, index, sizeIndex) {
     const { value } = event.target;
-    const size = this.props.order.orderDetails[index].product.productSizes.find(x => x.id === value);
+    const size = this.props.order.orderDetails[index].product.productSizes.find(x => x.id === +value);
     if (size.unitInStock <= 0) {
       this.setState({ showAlert: true, alertMessage: "Not enough amount in stock" });
       return;
     }
-    let data = { ...this.state.order };
-    data.orderDetails[index].productSizeId = value;
-    data.orderDetails[index].productSize = size
-    this.changeState(data);
+    size.orderDetailIndex = index;
+    this.props.changeProductSize(size)
+    // let data = { ...this.state.order };
+    // data.orderDetails[index].productSizeId = value;
+    // data.orderDetails[index].productSize = size
+    // this.changeState(data);
   }
   removeItem(item, index) {
     if (item.id) {
@@ -138,7 +140,7 @@ class OrderDetails extends Component {
               <thead>
                 <tr>
                   <th>Code</th>
-                  <th>Image</th>
+                  <th>Name</th>
                   <th>Size</th>
                   <th>Amount</th>
                   <th>Price</th>
@@ -162,7 +164,7 @@ class OrderDetails extends Component {
                         />
                       </td>
                       <td>
-                        {d.product ? <img style={imgSize} src={d.product.image} alt=""></img> : null}
+                        {d.product ? d.product.name : d.productName}
                       </td>
                       <td>
 
@@ -176,12 +178,12 @@ class OrderDetails extends Component {
                           }) : null}
                         </select>
                       </td>
-                      <td >
+                      <td className="number-cell-width">
                         <input type="number" value={d.quantity} className="form-control" name="quantity"
                           onChange={e => this.handleChange(e, d, i)}></input>
                       </td>
                       <td>{d.unitPrice}</td>
-                      <td className="d-flex">
+                      <td className="d-flex number-cell-width">
                         <input className="form-control mr-1"
                           name="discount"
                           readOnly
@@ -215,7 +217,8 @@ const mapDispatchToProps = {
   orderUpdate: orderActions.orderUpdate,
   clearOrder: orderActions.clearOrder,
   removeOrderItem: orderActions.removeOrderItem,
-  addOrderItem: orderActions.addOrderItem
+  addOrderItem: orderActions.addOrderItem,
+  changeProductSize: orderActions.changeProductSize
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrderDetails)

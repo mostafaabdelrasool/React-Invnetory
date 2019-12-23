@@ -11,7 +11,7 @@ export  class Login extends Component {
     componentDidMount(){
         localStorage.removeItem('Token');
     }
-    dataService = new AccountDataService();
+    dataService = new AccountDataService("Account");
     submit(event) {
         event.preventDefault();
         this.dataService.login(this.state.data).then(x=>{
