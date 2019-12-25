@@ -11,11 +11,13 @@ import Invoice from './invoice';
 import ModalComponent from "../common/modal/modal";
 import { connect } from 'react-redux';
 import * as orderAtions from './redux/order.action'
+import CustomerCreate from "../customer/customer.create.component";
 class OrderEdit extends Component {
   state = {
     isLoading: false,
     customers: [],
     showPay: false,
+    showCustomer: false
   };
 
   dataServ = new OrderDataService("Order");
@@ -54,7 +56,8 @@ class OrderEdit extends Component {
       label: customer.companyName,
       address: customer.address,
       city: customer.city,
-      phone: customer.phone
+      phone: customer.phone,
+      id: customer.id
     };
   }
   handleChange(event) {
@@ -71,20 +74,19 @@ class OrderEdit extends Component {
     data.shipAddress = value.address;
     data.shipCity = value.city;
     data.phone = value.phone;
-    data.customerId = value.value
+    data.customerId = value.value;
+    data.customer = value;
     this.props.orderUpdate(data);
   }
   save() {
     let data = { ...this.props.order };
     data.shipStatus = 2;
-    let dataToSave = JSON.parse(JSON.stringify(data));;
-    dataToSave.customer = undefined;
-    if (!dataToSave.id) {
-      this.dataServ.saveOrder(dataToSave).then(c => {
-         this.props.clearOrder();
+    if (!data.id) {
+      this.dataServ.saveOrder(data).then(c => {
+        this.props.clearOrder();
       });
     } else {
-      this.dataServ.updateOrder(dataToSave);
+      this.dataServ.updateOrder(data);
     }
   }
   handleFreightChange(event) {
@@ -99,16 +101,28 @@ class OrderEdit extends Component {
     this.setState({ showPay: showPay });
   }
   closeModal = () => {
-    this.setState({ showPay: false });
+    this.setState({ showPay: false, showCustomer: false });
   };
+  openCustomerPopup() {
+    this.setState({ showCustomer: true });
+  }
+  getSavedCutomer = (customer) => {
+    const mapped = this.mapCustomer(customer);
+    this.props.setCustomer(mapped);
+    this.setState({ showCustomer: false });
+  }
   render() {
     const fontSize = { fontSize: '35px' }
     const pay = this.state.showPay ? (<ModalComponent close={this.closeModal}>
       <Invoice total={this.props.order.overallTotal} data={this.props.order}></Invoice >
-    </ModalComponent>) : null
+    </ModalComponent>) : null;
+    const customer = this.state.showCustomer ? (<ModalComponent close={this.closeModal}>
+      <CustomerCreate customer={this.getSavedCutomer}></CustomerCreate >
+    </ModalComponent>) : null;
     return (
       <div>
         {pay}
+        {customer}
         <div className="d-flex justify-content-between">
           <div className="d-flex align-items-center">
             <Button
@@ -125,13 +139,13 @@ class OrderEdit extends Component {
                 this.pay();
               }}
               variant="dark"
-              className="align-items-start form-group"
+              className="align-items-start form-group m-3"
             >
               Pay
         </Button>
           </div>
 
-          <div className="d-flex flex-fill">
+          <div className="d-flex flex-fill justify-content-between">
             <div className="m-3">
               <div className="badge badge-warning order-info" >
                 Order Number: {this.props.order.orderNumber}
@@ -145,6 +159,18 @@ class OrderEdit extends Component {
               <div className="badge badge-dark order-info" style={fontSize}>
                 Overall Total : {this.props.order.overallTotal}</div>
             </div>
+            <div className="m-3">
+              <Button
+                onClick={() => {
+                  this.openCustomerPopup();
+                }}
+                variant="dark"
+                className="align-items-start form-group"
+              >
+                Add Customer
+        </Button>
+            </div>
+
           </div>
         </div>
 
@@ -152,6 +178,7 @@ class OrderEdit extends Component {
           <div className="card-header">Order Data</div>
           <div className="card-body">
             <div className="row">
+
               <div className="col-md-4 form-group d-flex">
                 <label>
                   customer
@@ -244,8 +271,9 @@ const mapDispatchToProps = {
   updateItemAction: orderAtions.updateItemAction,
   newItemAcion: orderAtions.newItemAcion,
   orderUpdate: orderAtions.orderUpdate,
-  clearOrder:orderAtions.clearOrder,
-  createNewOrderNumber:orderAtions.createNewOrderNumber
+  clearOrder: orderAtions.clearOrder,
+  createNewOrderNumber: orderAtions.createNewOrderNumber,
+  setCustomer: orderAtions.setCustomer
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(OrderEdit)

@@ -62,26 +62,12 @@ class OrderDetails extends Component {
     this.props.updateItemAction(data);
   }
   validateStock(orderDetail, value) {
-    const productSize = orderDetail.product.productSizes.find(x => x.id === orderDetail.productSizeId);
-    if (productSize.unitInStock < value) {
-      this.setState({ showAlert: true, alertMessage: "Value exceed this amount in stock" });
-      return false;
-    }
-    return true
-  }
-  handleProductSizeChange(event, index, sizeIndex) {
-    const { value } = event.target;
-    const size = this.props.order.orderDetails[index].product.productSizes.find(x => x.id === +value);
-    if (size.unitInStock <= 0) {
-      this.setState({ showAlert: true, alertMessage: "Not enough amount in stock" });
-      return;
-    }
-    size.orderDetailIndex = index;
-    this.props.changeProductSize(size)
-    // let data = { ...this.state.order };
-    // data.orderDetails[index].productSizeId = value;
-    // data.orderDetails[index].productSize = size
-    // this.changeState(data);
+    this.dataServ.validateStock(orderDetail.productId, value).then(x => {
+      if (!x) {
+        this.setState({ showAlert: true, alertMessage: "Value exceed this amount in stock" });
+      }
+    })
+
   }
   removeItem(item, index) {
     if (item.id) {
@@ -125,7 +111,6 @@ class OrderDetails extends Component {
         return { ...provided, opacity, transition };
       },
     }
-    const imgSize = { width: "100px" };
     return (
 
       <div className="form-group mt-1">
@@ -164,19 +149,10 @@ class OrderDetails extends Component {
                         />
                       </td>
                       <td>
-                        {d.product ? d.product.name : d.productName}
+                        {d.product ? d.product.productName : ''}
                       </td>
                       <td>
-
-                        <select
-                          className="form-control"
-                          value={d.productSizeId}
-                          onChange={e => this.handleProductSizeChange(e, i)}
-                        >
-                          {d.product ? d.product.productSizes.map((d, i) => {
-                            return <option key={i} value={d.id}>{d.size} / {d.unitInStock}</option>;
-                          }) : null}
-                        </select>
+                        {d.product ? d.product.productSize : ''}
                       </td>
                       <td className="number-cell-width">
                         <input type="number" value={d.quantity} className="form-control" name="quantity"

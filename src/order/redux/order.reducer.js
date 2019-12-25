@@ -1,14 +1,3 @@
-const initialState = {
-    shipAddress: "",
-    shipCity: "",
-    phone: "",
-    orderDetails: [],
-    customerId: null,
-    total: 0,
-    freight: 0,
-    overallTotal: 0,
-    orderDate: new Date()
-}
 const calculateTotal = (state) => {
     state.total = 0;
     state.orderDetails.forEach(x => {
@@ -38,9 +27,6 @@ const addOrderItem = (state, item) => {
     orderDetail.image = item.image;
     orderDetail.discount = 0;
     orderDetail.product = item;
-    orderDetail.productName = item.name;
-    orderDetail.productCode = item.label
-    orderDetail.productSizeId = item.productSizes.length > 0 ? item.productSizes[0].id : "";
     orderDetail.discount = item.discount;
     orderDetail.total = (+orderDetail.quantity * orderDetail.unitPrice);
     if (+orderDetail.discount > 0) {
@@ -49,8 +35,7 @@ const addOrderItem = (state, item) => {
     state.orderDetails[item.index] = orderDetail;
     return calculateTotal(state);
 }
-const createOrderNumber = (orderNumber) => {
-    let state = { ...initialState };
+const createOrderNumber = (state, orderNumber) => {
     state.orderNumber = orderNumber;
     return state;
 }
@@ -59,12 +44,28 @@ const changeProductSize = (state, size) => {
     state.orderDetails[size.orderDetailIndex].productSize = size;
     return state;
 }
-const orderReducer = (state = initialState, action) => {
+const setCutomerToOrder = (state, customer) => {
+    state.customerId = customer.id;
+    state.customer = customer;
+    state.phone = customer.phone;
+    return state;
+}
+const orderReducer = (state, action) => {
     switch (action.type) {
         case 'UDATE_ORDER':
             return action.payload;
         case 'CLEAR_ORDER':
-            return initialState
+            return {
+                shipAddress: "",
+                shipCity: "",
+                phone: "",
+                orderDetails: [],
+                customerId: null,
+                total: 0,
+                freight: 0,
+                overallTotal: 0,
+                orderDate: new Date()
+            }
         case 'UPDATE_ORDER_ITEM':
             return calculateTotal(action.payload);
         case 'REMOVE_ORDER_ITEM':
@@ -72,12 +73,23 @@ const orderReducer = (state = initialState, action) => {
         case 'ADD_ORDER_ITEM':
             return addOrderItem({ ...state }, action.payload);
         case 'CREATE_NEW_ORDER_NUMBER':
-            return createOrderNumber(action.payload);
+            return createOrderNumber({ ...state }, action.payload);
         case 'CHANGE_PRODUCT_SIZE':
             return changeProductSize({ ...state }, action.payload);
+        case 'SET_CUSTOMER':
+            return setCutomerToOrder({ ...state }, action.payload);
         default:
-            break;
+            return {
+                shipAddress: "",
+                shipCity: "",
+                phone: "",
+                orderDetails: [],
+                customerId: null,
+                total: 0,
+                freight: 0,
+                overallTotal: 0,
+                orderDate: new Date()
+            }
     }
-    return state;
 };
 export default orderReducer;

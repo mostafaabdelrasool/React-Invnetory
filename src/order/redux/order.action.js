@@ -46,5 +46,11 @@ export const changeProductSize = size => {
         payload: size
     }
 }
+export const setCustomer = customer => {
+    return {
+        type: 'SET_CUSTOMER',
+        payload: customer
+    }
+}
 export default newItemAcion | updateItemAction | orderUpdate | clearOrder |
-    removeOrderItem | addOrderItem | createNewOrderNumber | changeProductSize;
+    removeOrderItem | addOrderItem | createNewOrderNumber | changeProductSize | setCustomer;

@@ -23,7 +23,7 @@ export default class CustomerComponent extends Component {
             <StTableComponent
               setting={setting}
               fields={fields}
-              api="Customer"
+              api="Order/Customer"
             ></StTableComponent>
           </div>
         );

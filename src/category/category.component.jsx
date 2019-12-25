@@ -21,7 +21,7 @@ export default class Category extends Component {
         <StTableComponent
           setting={setting}
           fields={fields}
-          api="Category"
+          api="Product/Category"
         ></StTableComponent>
       </div>
     );
