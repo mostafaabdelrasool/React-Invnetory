@@ -6,6 +6,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { connect } from 'react-redux';
 import * as orderActions from './redux/order.action'
+import debounce from "../common/data/debounce";
 
 class OrderDetails extends Component {
   dataServ = new OrderDataService("Order");
@@ -25,19 +26,26 @@ class OrderDetails extends Component {
       this.changeState(newProps.order)
     }
   }
-  promiseOptions = inputValue =>
-    new Promise(resolve => {
-      setTimeout(() => {
-        this.dataServ.searchProduct(inputValue).then(c => {
-          resolve(
-            c.map(v => {
-              return OrderDataService.mapProduct(v);
-            })
-          );
-        });
-      }, 1000);
+  searchProductDebounce = debounce((inputValue, callBack) => {
+    this.dataServ.searchProduct(inputValue).then((data) => {
+      if (callBack) {
+        callBack(data);
+      }
     });
-
+  }, 300)
+  promiseOptions = inputValue => {
+    if (!inputValue) {
+      return
+    }
+    return new Promise(resolve => {
+      this.searchProductDebounce(inputValue, (data) => {
+        resolve(
+          data.map(v => {
+            return OrderDataService.mapProduct(v);
+          }))
+      })
+    })
+  }
   addNewProduct() {
     let order = { ...this.props.order };
     order.orderDetails.push({
@@ -152,7 +160,7 @@ class OrderDetails extends Component {
                         {d.product ? d.product.productName : ''}
                       </td>
                       <td>
-                        {d.product ? d.product.productSize : ''}
+                        {d.product ? d.product.size : ''}
                       </td>
                       <td className="number-cell-width">
                         <input type="number" value={d.quantity} className="form-control" name="quantity"

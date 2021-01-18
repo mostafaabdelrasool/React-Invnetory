@@ -2,18 +2,13 @@ import DataService from "../common/data/data.api";
 import axios from "axios";
 
 export default class OrderDataService extends DataService {
-    constructor(controller) {
-        super(controller);
-        //use to route to other servers
-        this.urlCopy = this.url;
-        this.url += "Order/"
-    }
-    productUrl = 'Product/'
     searchCustomers(query) {
-        return this.createPromise(axios.post(this.url + `Customer/Search?q=${query}`));
+        var filter = [{ columnName: "CompanyName", Operator: "=", value: query },
+        { columnName: "CompanyName", Operator: "=", value: query }];
+        return this.createPromise(axios.post(this.url + `Customer/Search`, filter));
     }
     searchProduct(query) {
-        return this.createPromise(axios.post(this.urlCopy + this.productUrl + `Product/Search?q=${query}`));
+        return this.createPromise(axios.get(this.url + `Product/SearchProduct?q=${query}`));
     }
     updateOrderStatus(order) {
         return this.createPromise(axios.put(this.url + `Order/PartialUpdate?properties=ShipStatus`, order));
@@ -36,7 +31,7 @@ export default class OrderDataService extends DataService {
         return newNumber;
 
     }
-    validateStock(productId, amount){
+    validateStock(productId, amount) {
         return this.createPromise(axios.get(this.urlCopy + this.productUrl + `Product/ValidateStock?productId=${productId}&amount=${amount}`));
     }
     static mapProduct(product) {
@@ -46,11 +41,11 @@ export default class OrderDataService extends DataService {
             name: product.productName,
             unitPrice: product.unitPrice,
             unitsInStock: product.unitsInStock,
-            image: product.image,
-            productSize: product.productSize,
+            productSizeId: product.productSizeId,
             discount: product.discount,
             id: product.id,
             productName: product.productName,
+            size: product.size,
             productCode: product.productCode
         };
     }

@@ -2,20 +2,20 @@ import React, { Component } from 'react'
 import "./login.style.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons';
-import { Link,withRouter } from 'react-router-dom'
+import { Link, withRouter } from 'react-router-dom'
 import AccountDataService from './account.service';
-export  class Login extends Component {
+export class Login extends Component {
     state = {
-        data: {}
+        data: { rememberMe: false }
     }
-    componentDidMount(){
+    componentDidMount() {
         localStorage.removeItem('Token');
     }
     dataService = new AccountDataService("Account");
     submit(event) {
         event.preventDefault();
-        this.dataService.login(this.state.data).then(x=>{
-            localStorage.setItem('Token',x);
+        this.dataService.login(this.state.data).then(x => {
+            localStorage.setItem('Token', x);
             this.props.history.push('/');
         })
     }
@@ -23,6 +23,11 @@ export  class Login extends Component {
         const { name, value } = event.target;
         let data = { ...this.state.data, [name]: value };
         this.setState({ data });
+    }
+    handleRememberMeChange() {
+        this.setState(({ data }) => 
+            data.rememberMe = !data.rememberMe
+          );
     }
     render() {
         return (
@@ -34,7 +39,7 @@ export  class Login extends Component {
                                 <h3>Sign In</h3>
                             </div>
                             <div className="card-body">
-                                <form onSubmit={(e)=>this.submit(e)}>
+                                <form onSubmit={(e) => this.submit(e)}>
                                     <div className="input-group form-group">
                                         <div className="input-group-prepend">
                                             <span className="input-group-text">
@@ -52,7 +57,7 @@ export  class Login extends Component {
                                         <input type="password" name="password" className="form-control" placeholder="password" onChange={e => this.handleChange(e)}></input>
                                     </div>
                                     <div className="row align-items-center remember">
-                                        <input type="checkbox" defaultChecked={false} name="rememberMe"  onChange={e => this.handleChange(e)}></input>Remember Me
+                                        <input type="checkbox" checked={this.state.data.rememberMe} name="rememberMe" onChange={e => this.handleRememberMeChange()}></input>Remember Me
                                     </div>
                                     <div className="form-group">
                                         <input type="submit" value="Login" className="btn float-right login_btn"></input>

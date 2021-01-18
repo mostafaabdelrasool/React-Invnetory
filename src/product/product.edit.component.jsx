@@ -1,27 +1,31 @@
 import React, { Component } from 'react'
 import DataService from "../common/data/data.api";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit } from "@fortawesome/free-solid-svg-icons";
 import { Button, Tabs, Tab } from "react-bootstrap";
 import ProductSizesComponent from './product.sizes.component';
-export default class ProductEdit extends Component {
+import { connect } from 'react-redux';
+import * as productActions from "./redux/product.action";
+import ProductDataService from "./product.data.service";
+import store from "../redux/store";
+
+const PRODUCT_SIZE_TAB = "productSize"
+const PRODUCT_TAB = "product"
+class ProductEdit extends Component {
+
     state = {
         categories: [],
-        data: {
-            ...(this.props.data || {
-                productName: "",
-                image: "",
-                unitPrice: "",
-                costPrice: "",
-                unitsInStock: 0,
-                discount:0
-            })
-        },
-        isEdit: this.props.data ? true : false
+        data: {},
     }
+    dataService = {};
     constructor(props) {
         super(props);
-        this.imgInput = React.createRef();
+        this.dataService = new ProductDataService("Product");
+    }
+    getCurrentStateProduct() {
+        if (this.props.id) {
+            const storeState = store.getState();
+            const currentProduct = storeState.product.find(x => x.id === this.props.id);
+            this.setState({ data: currentProduct })
+        }
     }
     handleChange(event) {
         const { name, value } = event.target;
@@ -29,21 +33,26 @@ export default class ProductEdit extends Component {
         this.setState({ data });
     }
     handleSubmit() {
-        if (this.state.isEdit) this.props.saveData.apply(null, [this.state.data]);
-        else this.props.addItem.apply(null, [this.state.data]);
-    }
-    uploadImage() {
-        this.imgInput.current.click();
-    }
-    onImageSelected(e) {
-        var reader = new FileReader();
-        reader.onload = loadEvent => {
-            let data = { ...this.state.data };
-            data.image = loadEvent.target.result;
-            this.setState({ data });
+        let data = { ...this.state.data };
+        data.productSizes = this.psComponent.getData();
+        this.setState({data})
+        if (this.state.data.id) {
+            this.updateItem(data);
+        }
+        else {
+            this.addItem(data);
         };
-        reader.readAsDataURL(e.target.files[0]);
     }
+    updateItem = (data) => {
+        this.dataService.update(data).then(res => {
+            this.props.UpdateProductAction(data)
+        });
+    };
+    addItem = (data) => {
+        this.dataService.add(data).then(res => {
+            this.props.AddProductAction(res)
+        });
+    };
     getCategories() {
         const dataServ = new DataService("Category");
         dataServ.get().then(d => {
@@ -52,100 +61,89 @@ export default class ProductEdit extends Component {
     }
     componentDidMount() {
         this.getCategories();
+        this.getCurrentStateProduct();
     }
     render() {
-        const imgSize = { width: "100%" };
-
         return (
             <div>
-                <Tabs defaultActiveKey="profile">
-                    <Tab eventKey="profile" title="Product">
+                <div>
+                    <Button className="m-1" onClick={e => this.handleSubmit(e)} variant="dark">
+                        Save
+                    </Button>
+                </div>
+                <Tabs defaultActiveKey={PRODUCT_TAB} activeKey={this.state.currentTab}>
+                    <Tab eventKey={PRODUCT_TAB} title="Product">
                         <form className="row">
-                            <div className="form-group col-md-4">
+                            <div className="form-group col-md-6">
+                                <label>Product Name</label>
                                 <input
-                                    ref={this.imgInput}
-                                    type="file"
-                                    hidden
-                                    onChange={e => this.onImageSelected(e)}
+                                    className="form-control"
+                                    type="text"
+                                    name="productName"
+                                    value={this.state.data.productName}
+                                    onChange={e => this.handleChange(e)}
                                 ></input>
-                                <FontAwesomeIcon
-                                    icon={faEdit}
-                                    onClick={() => this.uploadImage()}
-                                ></FontAwesomeIcon>
-                                <img style={imgSize} src={this.state.data.image} alt=""></img>
                             </div>
-                            <div className="col-md-8">
-                                <div className="form-group">
-                                    <div className="form-group">
-                                        <label>Product Name</label>
-                                        <input
-                                            className="form-control"
-                                            type="text"
-                                            name="productName"
-                                            value={this.state.data.productName}
-                                            onChange={e => this.handleChange(e)}
-                                        ></input>
-                                    </div>
-                                    <label>Unit Price</label>
-                                    <input
-                                        className="form-control"
-                                        type="number"
-                                        name="unitPrice"
-                                        value={this.state.data.unitPrice}
-                                        onChange={e => this.handleChange(e)}
-                                    ></input>
-                                </div>
-                                <div className="form-group">
-                                    <label>Cost Price</label>
-                                    <input
-                                        className="form-control"
-                                        type="number"
-                                        name="costPrice"
-                                        value={this.state.data.costPrice}
-                                        onChange={e => this.handleChange(e)}
-                                    ></input>
-                                </div>
-                                <div className="form-group">
-                                    <label>Units In Stock</label>
-                                    <input
-                                        className="form-control"
-                                        type="number"
-                                        name="unitsInStock"
-                                        onChange={e => this.handleChange(e)}
-                                        value={this.state.data.unitsInStock}
-                                    ></input>
-                                </div>
-                                <div className="form-group">
-                                    <label>Discount</label>
-                                    <input
-                                        className="form-control"
-                                        type="number"
-                                        name="discount"
-                                        onChange={e => this.handleChange(e)}
-                                        value={this.state.data.discount}
-                                    ></input>
-                                </div>
-                                <div className="form-group">
-                                    <label>Category</label>
-                                    <select
-                                        className="form-control"
-                                        name="categoryId"
-                                        value={this.state.data.categoryId}
-                                        onChange={e => this.handleChange(e)}
-                                    >
-                                        {this.state.categories.map((d, i) => {
-                                            return <option key={i} value={d.id}>{d.categoryName}</option>;
-                                        })}
-                                    </select>
-                                </div>
-                                <Button onClick={e => this.handleSubmit(e)} variant="dark">
-                                    Save
-                       </Button>
+                            <div className="form-group col-md-6 ">
+                                <label>Unit Price</label>
+                                <input
+                                    className="form-control"
+                                    type="number"
+                                    name="unitPrice"
+                                    value={this.state.data.unitPrice}
+                                    onChange={e => this.handleChange(e)}
+                                ></input>
                             </div>
+
+
+                            <div className="form-group col-md-6">
+                                <label>Cost Price</label>
+                                <input
+                                    className="form-control"
+                                    type="number"
+                                    name="costPrice"
+                                    value={this.state.data.costPrice}
+                                    onChange={e => this.handleChange(e)}
+                                ></input>
+                            </div>
+                            <div className="form-group col-md-6">
+                                <label>Units In Stock</label>
+                                <input
+                                    className="form-control"
+                                    type="number"
+                                    name="unitsInStock"
+                                    onChange={e => this.handleChange(e)}
+                                    value={this.state.data.unitsInStock}
+                                ></input>
+                            </div>
+                            <div className="form-group col-md-6">
+                                <label>Discount</label>
+                                <input
+                                    className="form-control"
+                                    type="number"
+                                    name="discount"
+                                    onChange={e => this.handleChange(e)}
+                                    value={this.state.data.discount}
+                                ></input>
+                            </div>
+                            <div className="form-group col-md-6">
+                                <label>Category</label>
+                                <select
+                                    className="form-control"
+                                    name="categoryId"
+                                    value={this.state.data.categoryId}
+                                    onChange={e => this.handleChange(e)}
+                                >
+                                    {this.state.categories.map((d, i) => {
+                                        return <option key={i} value={d.id}>{d.categoryName}</option>;
+                                    })}
+                                </select>
+                            </div>
+
                         </form>
                     </Tab>
-                    <Tab eventKey="ProductSize" title="Profile Size">
-                        <ProductSizesComponent></ProductSizesComponent>
+                    <Tab eventKey={PRODUCT_SIZE_TAB} title="Product Size">
+                        <ProductSizesComponent productId={this.state.data.id} onRef={ref => (this.psComponent = ref)}></ProductSizesComponent>
                     </Tab>
                 </Tabs>
 
@@ -153,4 +151,13 @@ export default class ProductEdit extends Component {
         );
     }
 }
+const mapDispatchToProps = {
+    AddProductAction: productActions.AddProductAction,
+    UpdateProductAction: productActions.UpdateProductAction,
+    DeleteProductAction: productActions.DeleteProductAction,
+}
+const mapStateToProps = (state) => {
+    return { data: state.product }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(ProductEdit)
 

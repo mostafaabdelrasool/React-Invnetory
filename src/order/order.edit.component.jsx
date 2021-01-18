@@ -7,6 +7,7 @@ import "./order.style.css";
 import OrderDetails from "./order.details.component";
 import { Button } from "react-bootstrap";
 import castAllDates from "../common/data/cast.all.dates";
+import debounce from "../common/data/debounce";
 import Invoice from './invoice';
 import ModalComponent from "../common/modal/modal";
 import { connect } from 'react-redux';
@@ -39,17 +40,25 @@ class OrderEdit extends Component {
       this.props.createNewOrderNumber(newOrderNo);
     }
   }
-
-  promiseOptions = inputValue =>
-    new Promise(resolve => {
-      setTimeout(() => {
-        this.dataServ.searchCustomers(inputValue).then(c => {
-          resolve(
-            c.map(v => this.mapCustomer(v))
-          );
-        });
-      }, 1000);
+  searchCustomerDebounce = debounce((inputValue, callBack) => {
+    this.dataServ.searchCustomers(inputValue).then((data) => {
+      if (callBack) {
+        callBack(data);
+      }
     });
+  }, 300)
+  promiseOptions = inputValue => {
+    if (!inputValue) {
+      return
+    }
+   return new Promise(resolve => {
+      this.searchCustomerDebounce(inputValue, (data) => {
+        resolve(
+          data.map(v => this.mapCustomer(v))
+        );
+      })
+    })
+  };
   mapCustomer(customer) {
     return {
       value: customer.id,
@@ -120,7 +129,7 @@ class OrderEdit extends Component {
       <CustomerCreate customer={this.getSavedCutomer}></CustomerCreate >
     </ModalComponent>) : null;
     return (
-      <div>
+      <div className="order-container">
         {pay}
         {customer}
         <div className="d-flex justify-content-between">

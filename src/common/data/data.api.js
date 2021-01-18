@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default class DataService {
-    url = 'https://localhost:44371/api/';
+    url = 'https://localhost:44364/api/';
     controller = "";
     /**
      * @param {string} name           Server controller name.

@@ -1,21 +1,30 @@
-import React, { Component } from "react";
-import { Table, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ModalComponent from "../common/modal/modal";
-import { faEdit, faTrash, faSitemap } from "@fortawesome/free-solid-svg-icons";
-import ProductEdit from './product.edit.component'
+import { Component } from "react";
 import ProductDataService from "./product.data.service";
-import ProductSizesComponent from "./product.sizes.component";
-export default class Product extends Component {
+import { connect } from 'react-redux';
+import * as productActions from "./redux/product.action";
+import store from "../redux/store";
+import RenderProduct from './jsx/product.ui'
+
+class ProductComponent extends Component {
   state = {
     data: [],
     showEditPopup: false,
     currentModel: {}
   };
+  constructor(props) {
+    super(props)
+    // subscribe to our store
+    store.subscribe(() => {
+      // set the result to component state
+      const storeState = store.getState();
+      this.setState({ data: storeState.product, showEditPopup: false })
+    })
+  }
   dataService = new ProductDataService("Product");
   componentDidMount() {
     this.dataService.get().then(res => {
-      this.setState({ data: res });
+      this.props.ListProductActions(res)
+      //this.setState({ data: res });
     });
   }
   showEditPopup(model) {
@@ -61,95 +70,16 @@ export default class Product extends Component {
       products[index].showChild = false;
       this.setState({ data: products });
     }
-
-
   }
-  renderProductSizes(product, index) {
-    if (!product.productSizes) {
-      return null
-    }
-    return < tr key={index}>
-      <td colSpan="6">
-        <ProductSizesComponent productId={product.id} data={product.productSizes}></ProductSizesComponent>
-      </td>
-    </tr>
-  }
+
   render() {
-    const imgSize = { width: "100px" };
-    let popup = this.state.showEditPopup ? (
-      <ModalComponent close={this.closeModal}>
-        <ProductEdit
-          data={this.state.currentModel}
-          saveData={this.saveData}
-          addItem={this.addItem}
-        ></ProductEdit>
-      </ModalComponent>
-    ) : null;
-    return (
-      <div>
-        <div className="row form-group">
-          <Button
-            onClick={() => {
-              this.showEditPopup();
-            }}
-            variant="dark"
-            className="align-items-start"
-          >
-            Add
-          </Button>
-        </div>
-        <Table striped bordered hover variant="dark">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>ProductName</th>
-              <th>Price</th>
-              <th>Discount</th>
-              <th>Cost</th>
-              <th>stock</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.data.map((x, i) => {
-              let rows = [];
-              rows.push(<tr key={i}>
-                <td>
-                  {x.productCode}
-                </td>
-                <td>{x.productName}</td>
-                <td>{x.unitPrice}</td>
-                <td>{x.discount}</td>
-                <td>{x.costPrice}</td>
-                <td>{x.unitsInStock}</td>
-                <td>
-                  <Button
-                    className="mr-1"
-                    onClick={() => this.showChildItems(i)}
-                  >
-                    <FontAwesomeIcon icon={faSitemap}></FontAwesomeIcon>
-                  </Button>
-                  <Button
-                    className="mr-1"
-                    onClick={() => this.showEditPopup(x)}
-                  >
-                    <FontAwesomeIcon icon={faEdit}></FontAwesomeIcon>
-                  </Button>
-
-                  <Button onClick={() => this.deleteItem(x.id)}>
-                    <FontAwesomeIcon icon={faTrash}></FontAwesomeIcon>
-                  </Button>
-                </td>
-              </tr>)
-              if (x.showChild) {
-                rows.push(this.renderProductSizes(x, i + 1));
-              }
-              return rows
-            })}
-          </tbody>
-        </Table>
-        {popup}
-      </div >
-    );
+    return RenderProduct.call(this)
   }
 }
+const mapDispatchToProps = {
+  ListProductActions: productActions.ListProductActions,
+}
+const mapStateToProps = (state) => {
+  return { data: state.product }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(ProductComponent)

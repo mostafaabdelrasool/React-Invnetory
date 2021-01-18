@@ -39,6 +39,16 @@ export default class CustomerCreate extends Component {
                             onChange={e => this.handleChange(e)}
                         ></input>
                     </div>
+                    <div className="form-group">
+                        <label>Address</label>
+                        <input
+                            className="form-control"
+                            type="text"
+                            name="address"
+                            value={this.state.data.address}
+                            onChange={e => this.handleChange(e)}
+                        ></input>
+                    </div>
                     <div>
                         <Button onClick={e => this.handleSubmit(e)} variant="dark">
                             Save
