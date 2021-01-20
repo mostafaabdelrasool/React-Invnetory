@@ -1,7 +1,8 @@
 import { Component } from 'react'
 import { connect } from 'react-redux';
 import * as productActions from "./redux/product.action";
-import RenderProductSize from "./jsx/product.sizes.ui"
+import RenderProductSize from "./jsx/product.sizes.ui";
+import store from "../redux/store";
 class ProductSizesComponent extends Component {
     state = { data: [] }
     addItem() {
@@ -30,7 +31,17 @@ class ProductSizesComponent extends Component {
         this.setState({ data: model });
     }
     componentDidMount() {
-        this.props.onRef(this)
+        this.props.onRef(this);
+        this.getCurrentStateProduct();
+    }
+    getCurrentStateProduct() {
+        if (this.props.productId) {
+            const storeState = store.getState();
+            const currentProduct = storeState.product.find(x => x.id === this.props.productId);
+            if(currentProduct){
+                this.setState({ data: currentProduct.productSizes || [] });
+            }
+        }
     }
     generateBarcode() {
         return Math.floor(10000 + Math.random() * 99999);

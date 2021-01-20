@@ -3,16 +3,16 @@ const addProduct = (state, payload) => {
     return [...state, payload];
 }
 const addProductSize = (state, payload) => {
-    let product = state.find(x=>x.id===payload.productId);
+    let product = state.find(x => x.id === payload.productId);
     if (product) {
         product.productSizes.push(payload);
     }
     return state;
 }
 const updateProduct = (state, payload) => {
-    let product = state.find(payload);
-    if (product !== null) {
-        product = payload;
+    const index = state.findIndex(x => x.id === payload.id);
+    if (index !== -1) {
+        state[index] = payload;
     }
     return state;
 }
@@ -32,19 +32,13 @@ const productReducer = (state, action) => {
         case actionType.ADD_PRODUCT:
             return addProduct([...state], action.payload);
         case actionType.ADD_PRODUCT_SIZE:
-            return addProductSize([ ...state], action.payload);
+            return addProductSize([...state], action.payload);
         case actionType.UPDATE_PRODUCT:
-            return updateProduct({
-                ...state
-            }, action.payload);
+            return updateProduct([...state], action.payload);
         case actionType.DELETE_PRODUCT:
-            return deleteProduct({
-                ...state
-            }, action.payload);
+            return deleteProduct([...state], action.payload);
         case actionType.LIST_PRODUCTS:
-            return listProducts({
-                ...state
-            }, action.payload);
+            return listProducts([...state], action.payload);
         default:
             return [{
                 productName: null,
